@@ -2,8 +2,6 @@ package za.co.entelect.challenge;
 
 import com.google.gson.Gson;
 import org.junit.jupiter.api.Test;
-import za.co.entelect.challenge.command.AccelerateCommand;
-import za.co.entelect.challenge.command.Command;
 import za.co.entelect.challenge.entities.DecisionBlock;
 import za.co.entelect.challenge.entities.GameState;
 import za.co.entelect.challenge.entities.Lane;
@@ -43,7 +41,7 @@ class BotTest {
         Lane[][] blocks = bot.getAllBlocksInFront(gameState.player.position.block);
 
         List<Lane> powerups = new ArrayList<>();
-        powerups = bot.getPowerups(blocks);
+        powerups = bot.getBoosts(blocks);
         assertEquals(3, powerups.size());
 
     }
@@ -54,7 +52,7 @@ class BotTest {
         Bot bot = new Bot(random,gameState);
         Lane[][] blocks = bot.getAllBlocksInFront(gameState.player.position.block);
 
-        List<Lane> powerups = bot.getPowerups(blocks);
+        List<Lane> powerups = bot.getBoosts(blocks);
 
         List<DecisionBlock> closest = bot.getDistanceToTargets(gameState.player.position, powerups);
         Collections.sort(closest);
@@ -62,17 +60,17 @@ class BotTest {
 //        assertEquals(Terrain.OIL_POWER, closest.get(0).lane.terrain);
     }
 
-    @Test
-    void testThatGetNextBestMoveReturnsAccelerateCommand() throws IOException {
-        GameState gameState = rehydrateGameState();
-        Bot bot = new Bot(random, gameState);
-
-        Lane[][] blocks = bot.getAllBlocksInFront(gameState.player.position.block);
-
-        Command command = bot.getNextBestCommand(blocks);
-        assertEquals(AccelerateCommand.class, command.getClass());
-
-    }
+//    @Test
+//    void testThatGetNextBestMoveReturnsAccelerateCommand() throws IOException {
+//        GameState gameState = rehydrateGameState();
+//        Bot bot = new Bot(random, gameState);
+//
+//        Lane[][] blocks = bot.getAllBlocksInFront(gameState.player.position.block);
+//
+//        Command command = bot.getNextBestCommand(blocks);
+//        assertEquals(AccelerateCommand.class, command.getClass());
+//
+//    }
 
     @Test
     void testThatTargetLaneContainsMud() throws IOException {
@@ -105,7 +103,7 @@ class BotTest {
         Bot bot = new Bot(random, gameState);
 
         Lane[][] blocks = bot.getAllBlocksInFront(gameState.player.position.block);
-        List<Lane> powerups = bot.getPowerups(blocks);
+        List<Lane> powerups = bot.getBoosts(blocks);
         List<DecisionBlock> closest = bot.getDistanceToTargets(gameState.player.position, powerups);
         Collections.sort(closest);
         Lane block = bot.getFirstObstacleBlock(blocks, gameState.player.position.lane);

@@ -1,5 +1,6 @@
 package za.co.entelect.challenge;
 
+import za.co.entelect.challenge.algorithm.BFSResult;
 import za.co.entelect.challenge.algorithm.PathHolder;
 import za.co.entelect.challenge.command.*;
 import za.co.entelect.challenge.entities.*;
@@ -47,22 +48,22 @@ public class Bot {
     }
 
     private Command getNextBestCommandBFS(Lane[][] frontBlocks) {
-        List<Lane> powerups = getPowerups(frontBlocks);
+        List<Lane> powerups = getBoosts(frontBlocks);
         List<DecisionBlock> closest = getDistanceToTargets(gameState.player.position, powerups);
         Collections.sort(closest);
         Command returnCommand = new AccelerateCommand();
 
-        if (powerups.size() > 0) {
-            returnCommand = bfSearch(gameState.player.position, frontBlocks, closest.get(0).lane.position);
-            if ((returnCommand instanceof AccelerateCommand) && hasBoostAvailable(gameState.player.powerups)) {
-                return new BoostCommand();
-            }
-        } else {
+//        if (powerups.size() > 0) {
+//            returnCommand = bfSearch(gameState.player.position, frontBlocks, closest.get(0).lane.position);
+//            if ((returnCommand instanceof AccelerateCommand) && hasBoostAvailable(gameState.player.powerups)) {
+//                return new BoostCommand();
+//            }
+//        } else {
 //            get the closest path to the end points but for now just be arbitrary
             returnCommand = bfSearch(gameState.player.position, frontBlocks, frontBlocks[gameState.player.position.lane-1][frontBlocks[0].length-1].position);
             if ((returnCommand instanceof AccelerateCommand) && hasBoostAvailable(gameState.player.powerups)) {
                 return new BoostCommand();
-            }
+//            }
 
         }
         return returnCommand;
@@ -75,14 +76,14 @@ public class Bot {
         return false;
     }
 
-    private Command findBestPath(GameState currentState) {
-        Lane[][] blocks = getAllBlocksInFront(currentState.player.position.block);
-        int bestVal = 0;
-        Command nextCommand = getNextCommand(gameState, blocks);
-        updateGameState(gameState, nextCommand);
-        int currentVal = minimax(gameState, 10);
-        return null;
-    }
+//    private Command findBestPath(GameState currentState) {
+//        Lane[][] blocks = getAllBlocksInFront(currentState.player.position.block);
+//        int bestVal = 0;
+//        Command nextCommand = getNextCommand(gameState, blocks);
+//        updateGameState(gameState, nextCommand);
+//        int currentVal = minimax(gameState, 10);
+//        return null;
+//    }
 
     private Command getNextCommand(GameState gameState, Lane[][] blocks) {
         int currentLane = gameState.player.position.lane;
@@ -108,13 +109,6 @@ public class Bot {
         return new DoNothingCommand();
     }
 
-    private GameState updateGameState(GameState gameState, Command nextCommand) {
-        if (nextCommand instanceof AccelerateCommand) {
-            gameState.player.position.block = gameState.player.position.block++;
-        }
-        return gameState;
-    }
-
     Lane[][] getAllBlocksInFront(int block) {
         Lane[][] blocks = new Lane[gameState.lanes.size()][];
 
@@ -126,26 +120,6 @@ public class Bot {
         return blocks;
     }
 
-    private List<Object> getPowerupsInFront(int lane, int block) {
-        List<Object> powerups = new ArrayList<>();
-
-
-        System.out.println("---------------------------------------------------------");
-        System.out.println(powerups.toString());
-        System.out.println("---------------------------------------------------------");
-
-//        for (Object block: blocks) {
-//            if ((block.equals(Terrain.BOOST)) || (block.equals(Terrain.OIL_POWER))) {
-//                powerups.add(block);
-//            }
-//        }
-        return powerups;
-    }
-
-//    public int minimax(GameState gameState, List<Object> moves, int depth) {
-    public int minimax(GameState gameState, int depth) {
-        return 0;
-    }
     /**
      * Returns map of blocks and the objects in the for the current lanes, returns the amount of blocks that can be
      * traversed at max speed.
@@ -167,12 +141,12 @@ public class Bot {
         return blocks;
     }
 
-    public List<Lane> getPowerups(Lane[][] blocks) {
+    public List<Lane> getBoosts(Lane[][] blocks) {
         List<Lane> returnArray = new ArrayList<>();
 
-        for (int i=0; i < blocks.length;i++) {
-            for (Lane lane : blocks[i]) {
-                if (lane.terrain.equals(Terrain.BOOST)){// || lane.terrain.equals(Terrain.OIL_POWER)) {
+        for (Lane[] block : blocks) {
+            for (Lane lane : block) {
+                if (lane.terrain.equals(Terrain.BOOST)) {
                     returnArray.add(lane);
                 }
             }
@@ -195,51 +169,43 @@ public class Bot {
         return Math.sqrt(Math.pow((target.lane-1 - source.lane), 2) + Math.pow((target.block - source.block),2));
     }
 
-    public Command getNextBestCommand(Lane[][] blocks) {
-        Command decision = null;
-        List<DecisionBlock> closest = getDistanceToTargets(gameState.player.position, getPowerups(blocks));
-        Collections.sort(closest);
-        int i=0;
-        // Iterate through the powerups
-        for (DecisionBlock block : closest) {
-            if (playerInLane(block)) {
-                Lane obstacle = getFirstObstacleBlock(blocks, block.lane.position.lane);
-                if (obstacle != null) {
-                    System.out.println("Obstacle is:" + obstacle.terrain);
-                    if (targetBlockInRangeOfObstacle(block, obstacle)) {
-                        return changeLane();
-                    } else {
-                        return boostIfAvailable();
-                    }
-                } else {
-                    return boostIfAvailable();
-                }
-            } else {
-                if (block.lane.position.lane > gameState.player.position.lane) {
-                    return new ChangeLaneCommand(1);
-                }else {
-                    return new ChangeLaneCommand(0);
-                }
+//    public Command getNextBestCommand(Lane[][] blocks) {
+//        List<DecisionBlock> closest = getDistanceToTargets(gameState.player.position, getBoosts(blocks));
+//        Collections.sort(closest);
+//        int i=0;
+//        // Iterate through the powerups
+//        for (DecisionBlock block : closest) {
+//            if (playerInLane(block)) {
 //                Lane obstacle = getFirstObstacleBlock(blocks, block.lane.position.lane);
-//
 //                if (obstacle != null) {
+//                    System.out.println("Obstacle is:" + obstacle.terrain);
+//                    if (targetBlockInRangeOfObstacle(block, obstacle)) {
+//                        return changeLane();
+//                    } else {
+//                        return boostIfAvailable();
+//                    }
 //                } else {
 //                    return boostIfAvailable();
 //                }
-
-            }
-        }
-
-        System.out.println("DOING NOTHING");
-        return new DoNothingCommand();
-    }
-
-    private Command boostIfAvailable() {
-        if (boostAvailable()) {
-            return new BoostCommand();
-        }
-        return new AccelerateCommand();
-    }
+//            } else {
+//                if (block.lane.position.lane > gameState.player.position.lane) {
+//                    return new ChangeLaneCommand(1);
+//                }else {
+//                    return new ChangeLaneCommand(0);
+//                }
+////                Lane obstacle = getFirstObstacleBlock(blocks, block.lane.position.lane);
+////
+////                if (obstacle != null) {
+////                } else {
+////                    return boostIfAvailable();
+////                }
+//
+//            }
+//        }
+//
+//        System.out.println("DOING NOTHING");
+//        return new DoNothingCommand();
+//    }
 
     private boolean playerInLane(DecisionBlock block) {
         return block.lane.position.lane == gameState.player.position.lane;
@@ -335,6 +301,8 @@ public class Bot {
         x=tempX;
         y=tempY;
 
+        BFSResult result = new BFSResult(null,0);
+
         Command currentCommand = new AccelerateCommand();
         while (null != prev[y][x]) {
             currentCommand = prev[y][x].prevCommand;
@@ -343,8 +311,11 @@ public class Bot {
             tempY = prev[y][x].prevY;
             x=tempX;
             y=tempY;
+            result.cost++;
 
         }
+        result.command=currentCommand;
+
         return currentCommand;
     }
 
