@@ -1,0 +1,8 @@
+{
+	"author": "John Doe",
+	"email": "John.Doe@example.com",
+	"nickName": "K.A.R.R.",
+	"botLocation": "/target",
+	"botFileName": "java-karr-bot-jar-with-dependencies.jar",
+	"botLanguage": "java"
+}
